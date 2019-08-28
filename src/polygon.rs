@@ -1,4 +1,4 @@
-use crate::utils::{Line, UnorientedLine};
+use crate::utils::{Point, Line, UnorientedLine};
 use crate::convex_polygon::ConvexPolygon;
 use std::cmp::Ordering;
 
@@ -102,5 +102,23 @@ impl Polygon {
 			out.push(edges.into_iter().map(UnorientedLine).collect());
 		}
 		Some(Self(out))
+	}
+
+	pub fn vertices(self) -> Vec<Vec<Point>> {
+		let mut out = Vec::new();
+		for poly in self.0 {
+			let n = poly.len();
+
+			let mut verts = Vec::with_capacity(n);
+
+			for i in 0..n {
+				let j = (i+1) % n;
+
+				verts.push(poly[i].intersect(poly[j]));
+			}
+			
+			out.push(verts);
+		}
+		out
 	}
 }
