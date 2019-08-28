@@ -1,0 +1,11 @@
+[package]
+name = "polygon3"
+version = "0.1.0"
+authors = ["finegeometer <finegeometer@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chain-end = { git = "https://github.com/finegeometer/chain-end-rs" }
+bit-vec = { git = "https://github.com/contain-rs/bit-vec" }
