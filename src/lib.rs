@@ -17,12 +17,10 @@
 //!
 //!
 
-
-mod utils;
 mod convex_polygon;
 mod polygon;
+mod utils;
 
-pub use utils::{Line, Point, LineMinIntError, PointMinIntError};
 pub use convex_polygon::ConvexPolygon;
 pub use polygon::Polygon;
-
+pub use utils::{Line, LineMinIntError, Point, PointMinIntError};
