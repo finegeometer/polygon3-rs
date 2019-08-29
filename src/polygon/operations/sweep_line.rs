@@ -42,12 +42,7 @@ impl SweepLine {
 		let mut relevant_edges: Vec<Edge> = self.edges.splice(range.clone(), std::iter::empty()).rev().collect();
 		let mut end_connector = ChainEndConnector::new();
 
-		for e in relevant_edges.iter_mut() {
-			if let Some(e) = e.out_chain_end.take() {
-				end_connector.end(&mut self.out, e);
-			}
-		}
-
+		relevant_edges.iter_mut().filter_map(|e| e.out_chain_end.take()).for_each(|e| end_connector.end(&mut self.out, e) );
 
 		SweepLineSection {
 			sweep_line: self,

@@ -21,16 +21,17 @@ impl Polygon {
 		let mut events = Q::new();
 
 		let mut polynum = 0;
-		for poly in polygons {
-			for edges in &poly.0 {
-				for i in 0..edges.len() {
-					let e1 = edges[i];
-					let e2 = edges[(i + 1) % edges.len()];
-					events.push(Event::new_vertex(e1.intersect(e2), [(e1, polynum), (e2, polynum)]))
-				}
-			}
+
+		polygons.into_iter().for_each(|poly| {
+			events.extend(
+				poly.0.iter().flat_map(|edges| 
+					crate::utils::pairs(&edges).map(|(&e1, &e2)| 
+						Event::new_vertex(e1.intersect(e2), [(e1, polynum), (e2, polynum)])
+					)
+				)
+			);
 			polynum += 1;
-		}
+		});
 
 		// Step 2: Sweep line.
 
@@ -58,16 +59,16 @@ impl Polygon {
 
 			let mut section = sweep_line.relevant_section_reversed(point);
 
-			for &(line, poly_idx) in line_endings.iter() {
+			line_endings.iter().for_each(|&(line, poly_idx)| {
 				section.insert(line, poly_idx);
-			}
+			});
 
-			for pt in section.boundary_intersections() {
-				let [_,_,z]: [i64; 3] = pt.into();
-				if z != 0 {
-					events.push(Event::new_intersection(pt));
-				}
-			}
+			events.extend(
+				section.boundary_intersections().filter(|&pt| {
+					let [_,_,z]: [i64; 3] = pt.into();
+					z != 0
+				}).map(Event::new_intersection)
+			);
 		}
 
 		Self(sweep_line.out)

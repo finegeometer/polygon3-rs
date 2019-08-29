@@ -253,3 +253,15 @@ impl PartialEq for UnorientedLine {
 	}
 }
 
+
+
+
+
+
+
+
+
+
+pub fn pairs<T>(slice: &[T]) -> impl Iterator<Item = (&T, &T)> {
+	slice.iter().zip(slice.iter().cycle().skip(1))
+}

@@ -99,3 +99,9 @@ impl Q {
 		Some(event.point)
 	}
 }
+
+impl Extend<Event> for Q {
+	fn extend<I: IntoIterator<Item = Event>>(&mut self, iter: I) {
+		iter.into_iter().for_each(|event| self.push(event));
+	}
+}

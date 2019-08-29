@@ -47,18 +47,10 @@ impl std::convert::TryFrom<ConvexPolygon> for Polygon {
 
 		let edges: Vec<Line> = poly.into();
 
-		if edges.is_empty() {
+		if edges.is_empty() || crate::utils::pairs(&edges).any(|(e1,e2)| e1.intersect(*e2).sign() != Ordering::Greater) {
 			return Err(InfiniteRegionError);
 		}
 
-		for i in 0..edges.len() {
-			let j = (i+1) % edges.len();
-			if let Ordering::Greater = edges[i].intersect(edges[j]).sign() {
-				// Empty if block
-			} else {
-				return Err(InfiniteRegionError);
-			}
-		}
 		// I hope this is compiled out
 		let edges: Vec<UnorientedLine> = edges.into_iter().map(UnorientedLine).collect();
 		Ok(Self(vec![edges]))
@@ -86,39 +78,23 @@ impl Default for Polygon {
 
 impl Polygon {
 	pub fn try_from_edges(polys: Vec<Vec<Line>>) -> Option<Self> {
-		let mut out = Vec::with_capacity(polys.len());
-		for edges in polys {
-			if edges.len() < 3 {
-				return None;
-			}
-			for i in 0..edges.len() {
-				let j = (i+1) % edges.len();
-				let [_,_,z]: [i64; 3] = edges[i].intersect(edges[j]).into();
-				if z == 0 {
-					return None;
-				}
-			}
+		polys.into_iter().map(|edges| {
 
-			out.push(edges.into_iter().map(UnorientedLine).collect());
-		}
-		Some(Self(out))
+			if edges.len() < 3 {return None;}
+
+			let invalid = crate::utils::pairs(&edges).any(|(e1, e2)| {
+				let [_,_,z]: [i64; 3] = e1.intersect(*e2).into();
+				z == 0
+			});
+
+			if invalid { return None; }
+
+			Some(edges.into_iter().map(UnorientedLine).collect())
+		}).collect::<Option<_>>()
+		.map(Self)
 	}
 
 	pub fn vertices(self) -> Vec<Vec<Point>> {
-		let mut out = Vec::new();
-		for poly in self.0 {
-			let n = poly.len();
-
-			let mut verts = Vec::with_capacity(n);
-
-			for i in 0..n {
-				let j = (i+1) % n;
-
-				verts.push(poly[i].intersect(poly[j]));
-			}
-			
-			out.push(verts);
-		}
-		out
+		self.0.into_iter().map(|edges| crate::utils::pairs(&edges).map(|(e1, e2)| e1.intersect(*e2)).collect()).collect()
 	}
 }

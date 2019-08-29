@@ -69,10 +69,8 @@ impl ConvexPolygon {
 		// Remove lines at infinity
 		let mut boundaries: Vec<_> = boundaries.into_iter().filter(|l| l.is_infinity() != Some(Ordering::Greater)).collect();
 
-		for l in &boundaries {
-			if l.is_infinity().is_some() {
-				return None;
-			}
+		if boundaries.iter().any(|l| l.is_infinity().is_some()) {
+			return None;
 		}
 
 		boundaries.sort_unstable_by_key(|l| (l.slope(), l.distance()));
